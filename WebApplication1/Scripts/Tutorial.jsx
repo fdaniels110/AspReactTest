@@ -1,10 +1,39 @@
 ﻿var CommentBox = React.createClass({
-    render: function () {
+    handleCommentSubmit: function (comment) {
+        // TODO: submit to server and refresh the list
+        var data = new FormData();
+        data.append("Author", comment.Author);
+        data.append("Text", comment.Text);
+
+        var request = new XMLHttpRequest();
+        request.open("post", this.props.submitUrl, true);
+        request.onload = function () {
+            this.loadCommentsFromServer();
+        }.bind(this);
+        request.send(data);
+    },
+    loadCommentsFromServer: function () {
+        var request = new XMLHttpRequest();
+        request.open("get", this.props.url, true);
+        request.onload = function () {
+            var data = JSON.parse(request.responseText);
+            this.setState({ data: data });
+        }.bind(this);
+        request.send();
+    },
+    getInitialState: function () {
+        return { data: [] };
+    },
+    componentDidMount: function () {
+        this.loadCommentsFromServer();
+        window.setInterval(this.loadCommentsFromServer, this.props.pollInterval)
+    },
+    render: function () {        
         return (
             <div className="commentBox">
                 <h1>Comments</h1>
-                <CommentList data={this.props.data} />
-                <CommentForm />
+                <CommentList data={this.state.data} />
+                <CommentForm onCommentSubmit={this.handleCommentSubmit} />
             </div>
         );
     }
@@ -28,11 +57,46 @@ var CommentList = React.createClass({
 });
 
 var CommentForm = React.createClass({
+    getInitialState: function () {
+        return { author: '', text: '' };
+    },
+    handleAuthorChange: function (e) {
+        this.setState({
+            author: e.target.value
+        });
+    },
+    handleTextChange: function (e) {
+        this.setState({
+            text: e.target.value
+        });
+    },
+    handleSubmit: function (e) {
+        e.preventDefault();
+        var author = this.state.author.trim();
+        var text = this.state.text.trim();
+        if (!text || !author) {
+            return;
+        }
+        this.props.onCommentSubmit({ Author: author, Text: text });
+        this.setState({ author: '', text: '' });
+    },
     render: function () {
         return (
-            <div className="commentForm">
-                Hello, world! I am a CommentForm.
-            </div>
+            <form className="commentForm" onSubmit={this.handleSubmit} >
+                <input
+                    type="text"
+                    placeholder="Your name"
+                    value={this.state.author}
+                    onChange={this.handleAuthorChange}
+                />
+                <input
+                    type="text"
+                    placeholder="Text"
+                    value={this.state.text}
+                    onChange={this.handleTextChange}
+                />
+                <input type="submit" value="Post" />
+            </form>
         );
     }
 });
@@ -62,6 +126,6 @@ var data = [
 ];
 
 ReactDOM.render(
-    <CommentBox data={data} />,
+    <CommentBox url="http://localhost:57354/Home/Comments" submitUrl="http://localhost:57354/Home/AddComment" pollInterval={2000} />,
     document.getElementById('content')
 );
