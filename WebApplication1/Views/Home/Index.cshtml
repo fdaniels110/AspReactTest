@@ -1,4 +1,4 @@
-﻿
+﻿@model IEnumerable<WebApplication1.Models.CommentModel>
 @{
     Layout = null;
 }
@@ -11,11 +11,17 @@
     <title>Hello Monterey County</title>
 </head>
 <body>
-    <div id="content"> 
-    </div>
+    @Html.React("CommentBox", new
+    {
+        initialData = Model,
+        url = Url.Action("Comments", "Home"),
+        submitUr = Url.Action("AddComment", "Home"),
+        pollInterval = 2000,
+    })
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.2/react.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.2/react-dom.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/remarkable/1.7.1/remarkable.min.js"></script>
     <script src="@Url.Content("~/Scripts/Tutorial.jsx")"></script>
+    @Html.ReactInitJavaScript()
 </body>
 </html>

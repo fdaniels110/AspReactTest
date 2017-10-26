@@ -1,6 +1,9 @@
 ﻿var CommentBox = React.createClass({
     handleCommentSubmit: function (comment) {
-        // TODO: submit to server and refresh the list
+        var comments = this.state.data;
+        comment.id = Date.now();
+        var newcomments = comments.concat([comment]);
+        this.setState({ data: newcomments });
         var data = new FormData();
         data.append("Author", comment.Author);
         data.append("Text", comment.Text);
@@ -22,7 +25,7 @@
         request.send();
     },
     getInitialState: function () {
-        return { data: [] };
+        return { data: this.props.initialData };
     },
     componentDidMount: function () {
         this.loadCommentsFromServer();
@@ -103,7 +106,7 @@ var CommentForm = React.createClass({
 
 var Comment = React.createClass({
     rawMarkup: function () {
-        var md = new Remarkable();
+        var md = new (global.Remarkable || window.Remarkable)();
         var rawMarkup = md.render(this.props.children.toString());
         return { __html: rawMarkup };
     },
@@ -125,7 +128,7 @@ var data = [
     { Id: 3, Author: "Jordan Walke", Text: "This is *another* comment" }
 ];
 
-ReactDOM.render(
-    <CommentBox url="http://localhost:57354/Home/Comments" submitUrl="http://localhost:57354/Home/AddComment" pollInterval={2000} />,
-    document.getElementById('content')
-);
+//ReactDOM.render(
+//    <CommentBox url="http://localhost:57354/Home/Comments" submitUrl="http://localhost:57354/Home/AddComment" pollInterval={2000} />,
+//    document.getElementById('content')
+//);

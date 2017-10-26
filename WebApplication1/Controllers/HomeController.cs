@@ -13,7 +13,7 @@ namespace WebApplication1.Controllers
         // GET: Home
         public ActionResult Index()
         {
-            return View();
+            return View(DAL.BaseDataAccessHelper.CommentsList());
         }
 
         [OutputCache(Location = OutputCacheLocation.None)]
